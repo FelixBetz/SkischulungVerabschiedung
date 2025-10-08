@@ -159,6 +159,12 @@
 					>
 						⚙ EINSTELLUNGEN
 					</button>
+					<a
+						href="/admin"
+						class="block w-full border-4 border-orange-400 bg-gradient-to-r from-orange-600 to-red-600 px-8 py-4 text-center text-xl font-bold text-white shadow-lg transition-all duration-200 hover:from-orange-500 hover:to-red-500"
+					>
+						🛠 ADMIN PANEL
+					</a>
 				</div>
 			</div>
 		</div>
