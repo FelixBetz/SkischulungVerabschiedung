@@ -2,9 +2,9 @@ import { json } from '@sveltejs/kit';
 import { teamsStore } from '$lib/stores/teams.svelte.js';
 import type { RequestHandler } from './$types.js';
 
-// GET /api/teams/[teamName] - Get specific team
+// GET /api/teams/[teamId] - Get specific team by ID
 export const GET: RequestHandler = async ({ params }) => {
-    const team = teamsStore.teams.find((t) => t.name === params.teamName);
+    const team = teamsStore.findTeamById(params.teamId);
 
     if (!team) {
         return json(
@@ -22,14 +22,14 @@ export const GET: RequestHandler = async ({ params }) => {
     });
 };
 
-// PATCH /api/teams/[teamName] - Update team points or name
+// PATCH /api/teams/[teamId] - Update team points or name by ID
 export const PATCH: RequestHandler = async ({ params, request }) => {
     try {
         const body = await request.json();
         const { points, name } = body;
-        const teamName = params.teamName;
+        const teamId = params.teamId;
 
-        const team = teamsStore.teams.find((t) => t.name === teamName);
+        const team = teamsStore.findTeamById(teamId);
         if (!team) {
             return json(
                 {
@@ -42,15 +42,15 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
         // Update points
         if (typeof points === 'number') {
-            teamsStore.updateTeamPoints(teamName, points);
+            teamsStore.updateTeamPoints(teamId, points);
         }
 
         // Update name
-        if (name && name !== teamName) {
-            teamsStore.updateTeamName(teamName, name);
+        if (name && name !== team.name) {
+            teamsStore.updateTeamName(teamId, name);
         }
 
-        const updatedTeam = teamsStore.teams.find((t) => t.name === (name || teamName));
+        const updatedTeam = teamsStore.findTeamById(teamId);
 
         return json({
             success: true,
@@ -68,10 +68,10 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
     }
 };
 
-// DELETE /api/teams/[teamName] - Remove team
+// DELETE /api/teams/[teamId] - Remove team by ID
 export const DELETE: RequestHandler = async ({ params }) => {
-    const teamName = params.teamName;
-    const team = teamsStore.teams.find((t) => t.name === teamName);
+    const teamId = params.teamId;
+    const team = teamsStore.findTeamById(teamId);
 
     if (!team) {
         return json(
@@ -83,7 +83,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
         );
     }
 
-    teamsStore.removeTeam(teamName);
+    teamsStore.removeTeam(teamId);
 
     return json({
         success: true,
