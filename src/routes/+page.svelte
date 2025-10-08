@@ -3,6 +3,8 @@
 	import { onMount } from 'svelte';
 	import ScoreSidebar from '$lib/components/ScoreSidebar.svelte';
 
+	const { teams } = teamsStore;
+
 	onMount(() => {
 		teamsStore.initializeSampleTeams();
 	});
@@ -26,7 +28,7 @@
 	</div>
 
 	<div class="relative z-10 flex min-h-screen">
-		<ScoreSidebar />
+		<ScoreSidebar {teams} />
 
 		<!-- Main content area -->
 		<div class="flex flex-1 items-center justify-center p-8">

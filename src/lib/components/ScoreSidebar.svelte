@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { teamsStore } from '$lib/stores/teams.svelte.js';
+	import type { Team } from '$lib/types';
 
-	const { teams } = teamsStore;
+	let { teams = [] }: { teams: Team[] } = $props();
 
-	// Sort teams by points descending for leaderboard effect
-	$: sortedTeams = [...teams].sort((a, b) => b.points - a.points);
+	let sortedTeams: Team[] = $derived(teams);
 </script>
 
 <!-- Retro Sidebar -->

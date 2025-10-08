@@ -1,5 +1,5 @@
 export interface Team {
-    name: string;
-    points: number;
-    iconUrl: string;
+	name: string;
+	points: number;
+	iconUrl: string;
 }
