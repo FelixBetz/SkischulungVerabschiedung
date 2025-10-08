@@ -1,92 +1,166 @@
 import { json } from '@sveltejs/kit';
-import { teamsStore } from '$lib/stores/teams.svelte.js';
+import { teamsRepository } from '$lib/server/db/teams.js';
 import type { RequestHandler } from './$types.js';
 
 // GET /api/teams/[teamId] - Get specific team by ID
 export const GET: RequestHandler = async ({ params }) => {
-    const team = teamsStore.findTeamById(params.teamId);
+	try {
+		const teamId = parseInt(params.teamId);
+		if (isNaN(teamId)) {
+			return json(
+				{
+					success: false,
+					error: 'Invalid team ID'
+				},
+				{ status: 400 }
+			);
+		}
 
-    if (!team) {
-        return json(
-            {
-                success: false,
-                error: 'Team not found'
-            },
-            { status: 404 }
-        );
-    }
+		const team = await teamsRepository.getTeamById(teamId);
 
-    return json({
-        success: true,
-        data: team
-    });
+		if (!team) {
+			return json(
+				{
+					success: false,
+					error: 'Team not found'
+				},
+				{ status: 404 }
+			);
+		}
+
+		return json({
+			success: true,
+			data: team
+		});
+	} catch (error) {
+		console.error('Error fetching team:', error);
+		return json(
+			{
+				success: false,
+				error: 'Failed to fetch team'
+			},
+			{ status: 500 }
+		);
+	}
 };
 
 // PATCH /api/teams/[teamId] - Update team points or name by ID
 export const PATCH: RequestHandler = async ({ params, request }) => {
-    try {
-        const body = await request.json();
-        const { points, name } = body;
-        const teamId = params.teamId;
+	try {
+		const body = await request.json();
+		const { points, name, addPoints } = body;
+		const teamId = parseInt(params.teamId);
 
-        const team = teamsStore.findTeamById(teamId);
-        if (!team) {
-            return json(
-                {
-                    success: false,
-                    error: 'Team not found'
-                },
-                { status: 404 }
-            );
-        }
+		if (isNaN(teamId)) {
+			return json(
+				{
+					success: false,
+					error: 'Invalid team ID'
+				},
+				{ status: 400 }
+			);
+		}
 
-        // Update points
-        if (typeof points === 'number') {
-            teamsStore.updateTeamPoints(teamId, points);
-        }
+		// Check if team exists
+		const existingTeam = await teamsRepository.getTeamById(teamId);
+		if (!existingTeam) {
+			return json(
+				{
+					success: false,
+					error: 'Team not found'
+				},
+				{ status: 404 }
+			);
+		}
 
-        // Update name
-        if (name && name !== team.name) {
-            teamsStore.updateTeamName(teamId, name);
-        }
+		let updatedTeam = existingTeam;
 
-        const updatedTeam = teamsStore.findTeamById(teamId);
+		// Update points (set absolute value)
+		if (typeof points === 'number') {
+			const result = await teamsRepository.updateTeamPoints(teamId, points);
+			if (result) updatedTeam = result;
+		}
 
-        return json({
-            success: true,
-            data: updatedTeam
-        });
-    } catch (error) {
-        console.log(error);
-        return json(
-            {
-                success: false,
-                error: 'Invalid JSON'
-            },
-            { status: 400 }
-        );
-    }
+		// Add points to existing total
+		if (typeof addPoints === 'number') {
+			const result = await teamsRepository.addPointsToTeam(teamId, addPoints);
+			if (result) updatedTeam = result;
+		}
+
+		// Update name
+		if (name && name !== existingTeam.name) {
+			const result = await teamsRepository.updateTeamName(teamId, name);
+			if (result) updatedTeam = result;
+		}
+
+		return json({
+			success: true,
+			data: updatedTeam
+		});
+	} catch (error) {
+		console.error('Error updating team:', error);
+		return json(
+			{
+				success: false,
+				error: 'Failed to update team'
+			},
+			{ status: 500 }
+		);
+	}
 };
 
 // DELETE /api/teams/[teamId] - Remove team by ID
 export const DELETE: RequestHandler = async ({ params }) => {
-    const teamId = params.teamId;
-    const team = teamsStore.findTeamById(teamId);
+	try {
+		const teamId = parseInt(params.teamId);
 
-    if (!team) {
-        return json(
-            {
-                success: false,
-                error: 'Team not found'
-            },
-            { status: 404 }
-        );
-    }
+		if (isNaN(teamId)) {
+			return json(
+				{
+					success: false,
+					error: 'Invalid team ID'
+				},
+				{ status: 400 }
+			);
+		}
 
-    teamsStore.removeTeam(teamId);
+		// Check if team exists
+		const existingTeam = await teamsRepository.getTeamById(teamId);
+		if (!existingTeam) {
+			return json(
+				{
+					success: false,
+					error: 'Team not found'
+				},
+				{ status: 404 }
+			);
+		}
 
-    return json({
-        success: true,
-        message: 'Team deleted successfully'
-    });
+		// Delete the team
+		const deleted = await teamsRepository.deleteTeam(teamId);
+
+		if (!deleted) {
+			return json(
+				{
+					success: false,
+					error: 'Failed to delete team'
+				},
+				{ status: 500 }
+			);
+		}
+
+		return json({
+			success: true,
+			message: 'Team deleted successfully'
+		});
+	} catch (error) {
+		console.error('Error deleting team:', error);
+		return json(
+			{
+				success: false,
+				error: 'Failed to delete team'
+			},
+			{ status: 500 }
+		);
+	}
 };

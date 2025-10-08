@@ -6,8 +6,8 @@
 	let loading = true;
 	let error: string | null = null;
 	let intervalId: ReturnType<typeof setInterval> | null = null;
-	let editingTeam: string | null = null; // Track which team is being edited
-	let saveStatus: { [teamId: string]: 'saving' | 'saved' | 'error' } = {};
+	let editingTeam: number | null = null; // Track which team is being edited
+	let saveStatus: { [teamId: number]: 'saving' | 'saved' | 'error' } = {};
 
 	async function loadTeams() {
 		try {
@@ -35,7 +35,7 @@
 		}
 	}
 
-	async function updateTeam(teamId: string, updates: { name?: string; points?: number }) {
+	async function updateTeam(teamId: number, updates: { name?: string; points?: number }) {
 		try {
 			saveStatus[teamId] = 'saving';
 			saveStatus = { ...saveStatus }; // Trigger reactivity

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { teamsStore } from '$lib/stores/teams.svelte.js';
 	import { onMount, onDestroy } from 'svelte';
 	import ScoreSidebar from '$lib/components/ScoreSidebar.svelte';
+	import type { Team } from '$lib/types';
 
-	const { teams } = teamsStore;
+	let teams = $state<Team[]>([]);
 
-	let loading = true;
-	let error: string | null = null;
+	let loading = $state(true);
+	let error: string | null = $state(null);
 	let intervalId: ReturnType<typeof setInterval> | null = null;
 
 	async function loadTeams() {
@@ -24,17 +24,13 @@
 
 			const result = await response.json();
 			if (result.success && Array.isArray(result.data)) {
-				teamsStore.setTeams(result.data);
+				teams = result.data;
 			} else {
 				throw new Error(result.error || 'Failed to load teams');
 			}
 		} catch (err) {
 			console.error('Error loading teams:', err);
 			error = err instanceof Error ? err.message : 'Failed to load teams';
-			// Fallback to sample teams if API fails (only on initial load)
-			if (teams.length === 0) {
-				teamsStore.initializeSampleTeams();
-			}
 		} finally {
 			loading = false;
 		}
@@ -95,7 +91,7 @@
 					<div class="mb-2 text-lg font-bold text-red-400">Fehler!</div>
 					<div class="mb-4 text-sm text-red-300">{error}</div>
 					<button
-						on:click={loadTeams}
+						onclick={loadTeams}
 						class="border-2 border-red-400 bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-500"
 					>
 						Erneut versuchen
