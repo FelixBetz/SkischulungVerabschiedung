@@ -1,12 +1,58 @@
 <script lang="ts">
 	import { teamsStore } from '$lib/stores/teams.svelte.js';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import ScoreSidebar from '$lib/components/ScoreSidebar.svelte';
 
 	const { teams } = teamsStore;
 
+	let loading = true;
+	let error: string | null = null;
+	let intervalId: ReturnType<typeof setInterval> | null = null;
+
+	async function loadTeams() {
+		try {
+			// Only show loading on initial load, not on subsequent updates
+			if (teams.length === 0) {
+				loading = true;
+			}
+			error = null;
+
+			const response = await fetch('/api/teams');
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			const result = await response.json();
+			if (result.success && Array.isArray(result.data)) {
+				teamsStore.setTeams(result.data);
+			} else {
+				throw new Error(result.error || 'Failed to load teams');
+			}
+		} catch (err) {
+			console.error('Error loading teams:', err);
+			error = err instanceof Error ? err.message : 'Failed to load teams';
+			// Fallback to sample teams if API fails (only on initial load)
+			if (teams.length === 0) {
+				teamsStore.initializeSampleTeams();
+			}
+		} finally {
+			loading = false;
+		}
+	}
+
 	onMount(() => {
-		teamsStore.initializeSampleTeams();
+		// Load teams immediately
+		loadTeams();
+
+		// Set up interval to load teams every second
+		intervalId = setInterval(loadTeams, 5000);
+	});
+
+	onDestroy(() => {
+		// Clean up interval when component is destroyed
+		if (intervalId !== null) {
+			clearInterval(intervalId);
+		}
 	});
 </script>
 
@@ -28,7 +74,37 @@
 	</div>
 
 	<div class="relative z-10 flex min-h-screen">
-		<ScoreSidebar {teams} />
+		{#if loading}
+			<!-- Loading sidebar -->
+			<div
+				class="flex w-80 items-center justify-center border-r-4 border-cyan-400 bg-black shadow-2xl"
+			>
+				<div class="text-center">
+					<div class="mb-4 text-lg font-bold text-cyan-400">Lade Teams...</div>
+					<div
+						class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-cyan-400 border-t-transparent"
+					></div>
+				</div>
+			</div>
+		{:else if error}
+			<!-- Error sidebar -->
+			<div
+				class="flex w-80 items-center justify-center border-r-4 border-red-400 bg-black shadow-2xl"
+			>
+				<div class="px-4 text-center">
+					<div class="mb-2 text-lg font-bold text-red-400">Fehler!</div>
+					<div class="mb-4 text-sm text-red-300">{error}</div>
+					<button
+						on:click={loadTeams}
+						class="border-2 border-red-400 bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-500"
+					>
+						Erneut versuchen
+					</button>
+				</div>
+			</div>
+		{:else}
+			<ScoreSidebar {teams} />
+		{/if}
 
 		<!-- Main content area -->
 		<div class="flex flex-1 items-center justify-center p-8">
