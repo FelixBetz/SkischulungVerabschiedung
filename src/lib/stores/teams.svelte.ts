@@ -26,6 +26,13 @@ class TeamsStore {
         this._teams = teams;
     }
 
+    updateTeamName(oldName: string, newName: string) {
+        const team = this._teams.find(t => t.name === oldName);
+        if (team) {
+            team.name = newName;
+        }
+    }
+
     initializeSampleTeams() {
         console.log('Initializing sample teams, current length:', this._teams.length);
         if (this._teams.length === 0) {
@@ -59,7 +66,5 @@ class TeamsStore {
 
 export const teamsStore = new TeamsStore();
 
-// Initialize sample teams immediately
-teamsStore.initializeSampleTeams();
 // Initialize sample teams immediately
 teamsStore.initializeSampleTeams();
