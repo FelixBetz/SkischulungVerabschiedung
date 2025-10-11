@@ -155,7 +155,6 @@
 		<div class="mx-auto flex max-w-7xl items-center justify-between">
 			<div>
 				<h1 class="text-2xl font-black tracking-wider text-white">ADMIN PANEL</h1>
-				<p class="text-sm font-bold text-orange-100">Team Management System</p>
 			</div>
 			<div class="flex gap-2">
 				<button
@@ -163,14 +162,14 @@
 					class="border border-white bg-transparent px-3 py-1.5 text-sm font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
 					disabled={loading}
 				>
-					{loading ? '↻ Lädt...' : '↻ Aktualisieren'}
+					{loading ? '↻ Lädt...' : '↻ Refresh'}
 				</button>
 				<a
 					href="/"
 					data-sveltekit-preload-data
 					class="border border-white bg-transparent px-3 py-1.5 text-sm font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
 				>
-					← Zurück zur Hauptseite
+					← Zurück
 				</a>
 			</div>
 		</div>
@@ -199,67 +198,62 @@
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each teams as team (team.id)}
 					<div class="border-2 border-orange-400 bg-gray-800 p-4 shadow-lg">
-						<!-- Team Icon and ID -->
-						<div class="mb-3 flex items-center">
-							<div
-								class="mr-3 flex h-12 w-12 items-center justify-center border border-gray-600 bg-black p-1"
-							>
-								<img
-									src={team.iconUrl}
-									alt="{team.name} icon"
-									class="h-full w-full object-contain brightness-110 contrast-125 filter"
+						<!-- Team Info Section -->
+						<div class="mb-3">
+							<div class="mb-1 flex items-center justify-between">
+								<span class="text-xs font-bold text-orange-300">Team Name:</span>
+								<span class="font-mono text-xs text-gray-400">ID: {team.id}</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<!-- Team Icon -->
+								<div
+									class="flex h-8 w-8 flex-shrink-0 items-center justify-center border border-gray-600 bg-black p-1"
+								>
+									<img
+										src={team.iconUrl}
+										alt="{team.name} icon"
+										class="h-full w-full object-contain brightness-110 contrast-125 filter"
+									/>
+								</div>
+								<!-- Team Name Input -->
+								<input
+									id="name-{team.id}"
+									type="text"
+									value={team.name}
+									onblur={(e) => handleNameChange(team, e)}
+									onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
+									class="flex-1 border border-gray-600 bg-gray-700 px-2 py-1 text-sm font-bold text-white transition-colors focus:border-orange-400 focus:outline-none"
+									placeholder="Team Name"
 								/>
 							</div>
-							<div class="font-mono text-xs text-gray-400">
-								ID: {team.id}
-							</div>
 						</div>
 
-						<!-- Editable Team Name -->
+						<!-- Points Section -->
 						<div class="mb-3">
-							<label for="name-{team.id}" class="mb-1 block text-xs font-bold text-orange-300">
-								Team Name:
-							</label>
-							<input
-								id="name-{team.id}"
-								type="text"
-								value={team.name}
-								onblur={(e) => handleNameChange(team, e)}
-								onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
-								class="w-full border border-gray-600 bg-gray-700 px-2 py-1.5 text-sm font-bold text-white transition-colors focus:border-orange-400 focus:outline-none"
-								placeholder="Team Name"
-							/>
-						</div>
-
-						<!-- Editable Points -->
-						<div class="mb-3">
-							<label for="points-{team.id}" class="mb-1 block text-xs font-bold text-orange-300">
-								Punkte:
-							</label>
-							<input
-								id="points-{team.id}"
-								type="number"
-								value={team.points}
-								onblur={(e) => handlePointsChange(team, e)}
-								onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
-								class="w-full border border-gray-600 bg-gray-700 px-2 py-1.5 text-sm font-bold text-white transition-colors focus:border-orange-400 focus:outline-none"
-								placeholder="0"
-							/>
-						</div>
-
-						<!-- Point Increment Buttons -->
-						<div class="mb-3">
-							<div class="mb-1 text-xs font-bold text-orange-300">Punkte hinzufügen:</div>
-							<div class="flex gap-1">
-								{#each [1, 2, 3, 4, 5] as points}
-									<button
-										onclick={() => addPoints(team.id, points)}
-										class="flex-1 border border-orange-400 bg-orange-600 px-1 py-1 text-xs font-bold text-white transition-colors hover:bg-orange-500 disabled:opacity-50"
-										disabled={saveStatus[team.id] === 'saving'}
-									>
-										+{points}
-									</button>
-								{/each}
+							<div class="mb-1 text-xs font-bold text-orange-300">Punkte:</div>
+							<div class="flex items-center gap-2">
+								<!-- Small Points Input -->
+								<input
+									id="points-{team.id}"
+									type="number"
+									value={team.points}
+									onblur={(e) => handlePointsChange(team, e)}
+									onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
+									class="w-16 border border-gray-600 bg-gray-700 px-2 py-1 text-xs font-bold text-white transition-colors focus:border-orange-400 focus:outline-none"
+									placeholder="0"
+								/>
+								<!-- Point Increment Buttons -->
+								<div class="flex flex-1 gap-1">
+									{#each [1, 2, 3, 4, 5] as points}
+										<button
+											onclick={() => addPoints(team.id, points)}
+											class="flex-1 border border-orange-400 bg-orange-600 px-1 py-1 text-xs font-bold text-white transition-colors hover:bg-orange-500 disabled:opacity-50"
+											disabled={saveStatus[team.id] === 'saving'}
+										>
+											+{points}
+										</button>
+									{/each}
+								</div>
 							</div>
 						</div>
 
