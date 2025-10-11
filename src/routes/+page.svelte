@@ -110,57 +110,14 @@
 					<h1
 						class="mb-8 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-8xl font-black tracking-wider text-transparent drop-shadow-2xl"
 					>
-						SKI
+						Skischulung 2025
 					</h1>
 					<h2
 						class="mb-4 bg-gradient-to-r from-pink-400 via-red-400 to-orange-400 bg-clip-text text-6xl font-black tracking-wider text-transparent"
 					>
-						CHALLENGE
+						Vearschiedung Felix Betz
 					</h2>
 					<div class="text-2xl font-bold tracking-[0.3em] text-cyan-400">◆ ◇ ◆ ◇ ◆ ◇ ◆</div>
-				</div>
-
-				<!-- Game status display -->
-				<div
-					class="mb-12 rounded-none border-4 border-cyan-400 bg-black/80 p-8 shadow-2xl shadow-cyan-400/20"
-				>
-					<div class="grid grid-cols-3 gap-8 text-center">
-						<div class="border-r-2 border-gray-600 pr-8">
-							<div class="mb-2 text-4xl font-bold text-yellow-400">⚡</div>
-							<div class="text-xl font-bold text-white">AKTIV</div>
-							<div class="text-sm text-gray-400">SYSTEM STATUS</div>
-						</div>
-						<div class="border-r-2 border-gray-600 pr-8">
-							<div class="mb-2 text-4xl font-bold text-green-400">●</div>
-							<div class="text-xl font-bold text-white">LIVE</div>
-							<div class="text-sm text-gray-400">PUNKTESTAND</div>
-						</div>
-						<div>
-							<div class="mb-2 text-4xl font-bold text-purple-400">4</div>
-							<div class="text-xl font-bold text-white">TEAMS</div>
-							<div class="text-sm text-gray-400">IM RENNEN</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Action buttons -->
-				<div class="space-y-6">
-					<button
-						class="w-full transform border-4 border-cyan-300 bg-gradient-to-r from-cyan-500 to-blue-600 px-12 py-6 text-2xl font-bold text-black shadow-lg transition-all duration-200 hover:scale-105 hover:from-cyan-400 hover:to-blue-500"
-					>
-						► SPIEL STARTEN
-					</button>
-					<button
-						class="w-full border-4 border-purple-400 bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-xl font-bold text-white shadow-lg transition-all duration-200 hover:from-purple-500 hover:to-pink-500"
-					>
-						⚙ EINSTELLUNGEN
-					</button>
-					<a
-						href="/admin"
-						class="block w-full border-4 border-orange-400 bg-gradient-to-r from-orange-600 to-red-600 px-8 py-4 text-center text-xl font-bold text-white shadow-lg transition-all duration-200 hover:from-orange-500 hover:to-red-500"
-					>
-						🛠 ADMIN PANEL
-					</a>
 				</div>
 			</div>
 		</div>
