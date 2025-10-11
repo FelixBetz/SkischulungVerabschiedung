@@ -1,17 +1,15 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { Team } from '$lib/types.js';
 
-	let teams: Team[] = [];
-	let loading = true;
-	let error: string | null = null;
-	let intervalId: ReturnType<typeof setInterval> | null = null;
-	let editingTeam: number | null = null; // Track which team is being edited
-	let saveStatus: { [teamId: number]: 'saving' | 'saved' | 'error' } = {};
+	let teams: Team[] = $state([]);
+	let loading = $state(true);
+	let error: string | null = $state(null);
+	let saveStatus: { [teamId: number]: 'saving' | 'saved' | 'error' } = $state({});
 
-	async function loadTeams() {
+	async function loadTeams(forceLoading = false) {
 		try {
-			if (teams.length === 0) {
+			if (teams.length === 0 || forceLoading) {
 				loading = true;
 			}
 			error = null;
@@ -55,6 +53,15 @@
 				throw new Error(result.error || 'Failed to update team');
 			}
 
+			// Update local team data immediately with the server response
+			if (result.data) {
+				const teamIndex = teams.findIndex((t) => t.id === teamId);
+				if (teamIndex !== -1) {
+					teams[teamIndex] = result.data;
+					teams = [...teams]; // Trigger reactivity
+				}
+			}
+
 			saveStatus[teamId] = 'saved';
 			setTimeout(() => {
 				delete saveStatus[teamId];
@@ -79,6 +86,8 @@
 	}
 
 	function handlePointsChange(team: Team, event: Event) {
+		console.log('handlePointsChange called');
+
 		const input = event.target as HTMLInputElement;
 		const newPoints = parseInt(input.value);
 		if (!isNaN(newPoints) && newPoints !== team.points) {
@@ -88,13 +97,6 @@
 
 	onMount(() => {
 		loadTeams();
-		intervalId = setInterval(loadTeams, 2000); // Update every 2 seconds (less frequent for admin)
-	});
-
-	onDestroy(() => {
-		if (intervalId !== null) {
-			clearInterval(intervalId);
-		}
 	});
 </script>
 
@@ -111,12 +113,21 @@
 				<h1 class="text-3xl font-black tracking-wider text-white">ADMIN PANEL</h1>
 				<p class="font-bold text-orange-100">Team Management System</p>
 			</div>
-			<a
-				href="/"
-				class="border-2 border-white bg-transparent px-4 py-2 font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
-			>
-				← Zurück zur Hauptseite
-			</a>
+			<div class="flex gap-3">
+				<button
+					onclick={() => loadTeams(true)}
+					class="border-2 border-white bg-transparent px-4 py-2 font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
+					disabled={loading}
+				>
+					{loading ? '↻ Lädt...' : '↻ Aktualisieren'}
+				</button>
+				<a
+					href="/"
+					class="border-2 border-white bg-transparent px-4 py-2 font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
+				>
+					← Zurück zur Hauptseite
+				</a>
+			</div>
 		</div>
 	</div>
 
@@ -133,7 +144,7 @@
 				<div class="mb-4 text-xl font-bold text-red-400">Fehler beim Laden!</div>
 				<div class="mb-6 text-red-300">{error}</div>
 				<button
-					on:click={loadTeams}
+					onclick={() => loadTeams()}
 					class="border-2 border-red-400 bg-red-600 px-6 py-3 font-bold text-white transition-colors hover:bg-red-500"
 				>
 					Erneut versuchen
@@ -168,8 +179,8 @@
 								id="name-{team.id}"
 								type="text"
 								value={team.name}
-								on:blur={(e) => handleNameChange(team, e)}
-								on:keydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
+								onblur={(e) => handleNameChange(team, e)}
+								onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
 								class="w-full border-2 border-gray-600 bg-gray-700 px-3 py-2 font-bold text-white transition-colors focus:border-orange-400 focus:outline-none"
 								placeholder="Team Name"
 							/>
@@ -184,8 +195,8 @@
 								id="points-{team.id}"
 								type="number"
 								value={team.points}
-								on:blur={(e) => handlePointsChange(team, e)}
-								on:keydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
+								onblur={(e) => handlePointsChange(team, e)}
+								onkeydown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement)?.blur()}
 								class="w-full border-2 border-gray-600 bg-gray-700 px-3 py-2 font-bold text-white transition-colors focus:border-orange-400 focus:outline-none"
 								placeholder="0"
 							/>

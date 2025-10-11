@@ -86,7 +86,7 @@ export const PUT: RequestHandler = async ({ request }) => {
 		}
 
 		for (const team of teams) {
-			const { id, ...teamData } = team;
+			const { ...teamData } = team;
 			await teamsRepository.createTeam(teamData);
 		}
 
