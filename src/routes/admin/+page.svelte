@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Team } from '$lib/types.js';
+	import { GameState } from '$lib/types.js';
 
 	let teams: Team[] = $state([]);
 	let loading = $state(true);
 	let error: string | null = $state(null);
 	let saveStatus: { [teamId: number]: 'saving' | 'saved' | 'error' } = $state({});
+	let currentGameState: GameState = $state(GameState.HOME);
 
 	async function loadTeams(forceLoading = false) {
 		try {
@@ -139,8 +141,42 @@
 		}
 	}
 
+	async function loadGameState() {
+		try {
+			const response = await fetch('/api/gamestate');
+			if (response.ok) {
+				const result = await response.json();
+				if (result.success) {
+					currentGameState = result.data.currentState;
+				}
+			}
+		} catch (err) {
+			console.error('Error loading game state:', err);
+		}
+	}
+
+	async function updateGameState(newState: GameState) {
+		try {
+			const response = await fetch('/api/gamestate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ state: newState })
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				if (result.success) {
+					currentGameState = result.data.currentState;
+				}
+			}
+		} catch (err) {
+			console.error('Error updating game state:', err);
+		}
+	}
+
 	onMount(() => {
 		loadTeams();
+		loadGameState();
 	});
 </script>
 
@@ -152,25 +188,34 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 font-mono">
 	<!-- Header -->
 	<div class="border-b-2 border-orange-400 bg-gradient-to-r from-orange-500 to-red-500 p-4">
-		<div class="mx-auto flex max-w-7xl items-center justify-between">
-			<div>
-				<h1 class="text-2xl font-black tracking-wider text-white">ADMIN PANEL</h1>
+		<div class="mx-auto max-w-7xl">
+			<div class="mb-4 flex items-center justify-between">
+				<div>
+					<h1 class="text-2xl font-black tracking-wider text-white">ADMIN PANEL</h1>
+				</div>
+				<div class="flex gap-2">
+					<button
+						onclick={() => loadTeams(true)}
+						class="border border-white bg-transparent px-3 py-1.5 text-sm font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
+						disabled={loading}
+					>
+						{loading ? '↻ Lädt...' : '↻ Refresh'}
+					</button>
+				</div>
 			</div>
-			<div class="flex gap-2">
-				<button
-					onclick={() => loadTeams(true)}
-					class="border border-white bg-transparent px-3 py-1.5 text-sm font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
-					disabled={loading}
-				>
-					{loading ? '↻ Lädt...' : '↻ Refresh'}
-				</button>
-				<a
-					href="/"
-					data-sveltekit-preload-data
-					class="border border-white bg-transparent px-3 py-1.5 text-sm font-bold text-white transition-colors hover:bg-white hover:text-orange-500"
-				>
-					← Zurück
-				</a>
+
+			<!-- Game State Switching Buttons -->
+			<div class="flex flex-wrap gap-2">
+				{#each Object.values(GameState) as state (state)}
+					<button
+						onclick={() => updateGameState(state)}
+						class="px-3 py-1.5 text-sm font-bold transition-colors {currentGameState === state
+							? 'border border-white bg-white text-orange-500'
+							: 'border border-white bg-transparent text-white hover:bg-white hover:text-orange-500'}"
+					>
+						{state}
+					</button>
+				{/each}
 			</div>
 		</div>
 	</div>
@@ -244,7 +289,7 @@
 								/>
 								<!-- Point Increment Buttons -->
 								<div class="flex flex-1 gap-1">
-									{#each [1, 2, 3, 4, 5] as points}
+									{#each [1, 2, 3, 4, 5] as points (points)}
 										<button
 											onclick={() => addPoints(team.id, points)}
 											class="flex-1 border border-orange-400 bg-orange-600 px-1 py-1 text-xs font-bold text-white transition-colors hover:bg-orange-500 disabled:opacity-50"

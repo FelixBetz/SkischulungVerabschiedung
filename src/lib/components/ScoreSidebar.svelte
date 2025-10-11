@@ -17,7 +17,7 @@
 	</div>
 
 	<div class="space-y-3 p-4">
-		{#each sortedTeams as team, index}
+		{#each sortedTeams as team, index (team.id)}
 			<div class="group relative">
 				<!-- Team card -->
 				<div

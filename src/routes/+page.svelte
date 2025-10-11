@@ -1,9 +1,17 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import ScoreSidebar from '$lib/components/ScoreSidebar.svelte';
+	import Welcome from '$lib/components/Welcome.svelte';
+	import Game1 from '$lib/components/Game1.svelte';
+	import Game2 from '$lib/components/Game2.svelte';
+	import Game3 from '$lib/components/Game3.svelte';
+	import Game4 from '$lib/components/Game4.svelte';
+	import Game5 from '$lib/components/Game5.svelte';
 	import type { Team } from '$lib/types';
+	import { GameState } from '$lib/types';
 
 	let teams = $state<Team[]>([]);
+	let currentGameState: GameState = $state(GameState.HOME);
 
 	let loading = $state(true);
 	let error: string | null = $state(null);
@@ -36,12 +44,30 @@
 		}
 	}
 
-	onMount(() => {
-		// Load teams immediately
-		loadTeams();
+	async function loadGameState() {
+		try {
+			const response = await fetch('/api/gamestate');
+			if (response.ok) {
+				const result = await response.json();
+				if (result.success) {
+					currentGameState = result.data.currentState;
+				}
+			}
+		} catch (err) {
+			console.error('Error loading game state:', err);
+		}
+	}
 
-		// Set up interval to load teams every second
-		intervalId = setInterval(loadTeams, 5000);
+	onMount(() => {
+		// Load teams and game state immediately
+		loadTeams();
+		loadGameState();
+
+		// Set up interval to load teams and game state
+		intervalId = setInterval(() => {
+			loadTeams();
+			loadGameState();
+		}, 500);
 	});
 
 	onDestroy(() => {
@@ -60,7 +86,7 @@
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 font-mono">
 	<!-- Animated background -->
 	<div class="pointer-events-none fixed inset-0 overflow-hidden">
-		{#each Array(20) as _, i}
+		{#each Array.from({ length: 20 }, (_, i) => i) as i (i)}
 			<div
 				class="absolute h-1 w-1 animate-pulse rounded-full bg-white"
 				style="top: {Math.random() * 100}%; left: {Math.random() *
@@ -104,22 +130,20 @@
 
 		<!-- Main content area -->
 		<div class="flex flex-1 items-center justify-center p-8">
-			<div class="max-w-4xl text-center">
-				<!-- Main title -->
-				<div class="mb-16">
-					<h1
-						class="mb-8 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-8xl font-black tracking-wider text-transparent drop-shadow-2xl"
-					>
-						Skischulung 2025
-					</h1>
-					<h2
-						class="mb-4 bg-gradient-to-r from-pink-400 via-red-400 to-orange-400 bg-clip-text text-6xl font-black tracking-wider text-transparent"
-					>
-						Vearschiedung Felix Betz
-					</h2>
-					<div class="text-2xl font-bold tracking-[0.3em] text-cyan-400">◆ ◇ ◆ ◇ ◆ ◇ ◆</div>
-				</div>
-			</div>
+			<!-- Dynamic content based on game state -->
+			{#if currentGameState === GameState.HOME}
+				<Welcome />
+			{:else if currentGameState === GameState.GAME1}
+				<Game1 {teams} />
+			{:else if currentGameState === GameState.GAME2}
+				<Game2 {teams} />
+			{:else if currentGameState === GameState.GAME3}
+				<Game3 {teams} />
+			{:else if currentGameState === GameState.GAME4}
+				<Game4 {teams} />
+			{:else if currentGameState === GameState.GAME5}
+				<Game5 {teams} />
+			{/if}
 		</div>
 	</div>
 </div>
