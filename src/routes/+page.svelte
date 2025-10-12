@@ -134,15 +134,15 @@
 			{#if currentGameState === GameState.HOME}
 				<Welcome />
 			{:else if currentGameState === GameState.GAME1}
-				<Game1 {teams} />
+				<Game1 />
 			{:else if currentGameState === GameState.GAME2}
-				<Game2 {teams} />
+				<Game2 />
 			{:else if currentGameState === GameState.GAME3}
-				<Game3 {teams} />
+				<Game3 />
 			{:else if currentGameState === GameState.GAME4}
-				<Game4 {teams} />
+				<Game4 />
 			{:else if currentGameState === GameState.GAME5}
-				<Game5 {teams} />
+				<Game5 />
 			{/if}
 		</div>
 	</div>
