@@ -13,34 +13,19 @@
 	let teams = $state<Team[]>([]);
 	let currentGameState: GameState = $state(GameState.HOME);
 
-	let loading = $state(true);
-	let error: string | null = $state(null);
 	let intervalId: ReturnType<typeof setInterval> | null = null;
 
 	async function loadTeams() {
-		try {
-			// Only show loading on initial load, not on subsequent updates
-			if (teams.length === 0) {
-				loading = true;
-			}
-			error = null;
+		const response = await fetch('/api/teams');
+		if (!response.ok) {
+			teams = [];
+		}
 
-			const response = await fetch('/api/teams');
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-
-			const result = await response.json();
-			if (result.success && Array.isArray(result.data)) {
-				teams = result.data;
-			} else {
-				throw new Error(result.error || 'Failed to load teams');
-			}
-		} catch (err) {
-			console.error('Error loading teams:', err);
-			error = err instanceof Error ? err.message : 'Failed to load teams';
-		} finally {
-			loading = false;
+		const result = await response.json();
+		if (result.success && Array.isArray(result.data)) {
+			teams = result.data;
+		} else {
+			teams = [];
 		}
 	}
 
@@ -96,45 +81,15 @@
 	</div>
 
 	<div class="relative z-10 flex min-h-screen">
-		{#if loading}
-			<!-- Loading sidebar -->
-			<div
-				class="flex w-80 items-center justify-center border-r-4 border-cyan-400 bg-black shadow-2xl"
-			>
-				<div class="text-center">
-					<div class="mb-4 text-lg font-bold text-cyan-400">Lade Teams...</div>
-					<div
-						class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-cyan-400 border-t-transparent"
-					></div>
-				</div>
-			</div>
-		{:else if error}
-			<!-- Error sidebar -->
-			<div
-				class="flex w-80 items-center justify-center border-r-4 border-red-400 bg-black shadow-2xl"
-			>
-				<div class="px-4 text-center">
-					<div class="mb-2 text-lg font-bold text-red-400">Fehler!</div>
-					<div class="mb-4 text-sm text-red-300">{error}</div>
-					<button
-						onclick={loadTeams}
-						class="border-2 border-red-400 bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-500"
-					>
-						Erneut versuchen
-					</button>
-				</div>
-			</div>
-		{:else}
-			<ScoreSidebar {teams} />
-		{/if}
+		<ScoreSidebar {teams} />
 
 		<!-- Main content area -->
-		<div class="flex flex-1 items-center justify-center p-8">
+		<div class="flex flex-1 items-center justify-center">
 			<!-- Dynamic content based on game state -->
 			{#if currentGameState === GameState.HOME}
 				<Welcome />
 			{:else if currentGameState === GameState.GAME1}
-				<Game1 />
+				<Game1 {teams} />
 			{:else if currentGameState === GameState.GAME2}
 				<Game2 />
 			{:else if currentGameState === GameState.GAME3}
