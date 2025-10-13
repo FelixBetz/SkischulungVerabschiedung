@@ -1,0 +1,17 @@
+{
+	"id": "food",
+	"name": "Essen & Trinken",
+	"startingWord": "Pizza",
+	"availableWords": [
+		"Pasta",
+		"Brot",
+		"Käse",
+		"Schokolade",
+		"Kaffee",
+		"Tee",
+		"Wasser",
+		"Salat",
+		"Suppe",
+		"Kuchen"
+	]
+}

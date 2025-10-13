@@ -11,14 +11,17 @@
 		remainingWords: [],
 		currentTeamIndex: 0,
 		selectedWord: '',
-		selectedPosition: -1
+		selectedPosition: -1,
+		currentWordSet: 'general'
 	});
 
-	// Admin-specific state - removed, now using gameState.selectedPosition
+	// Word sets
+	let availableWordSets = $state<Array<{ id: string; name: string }>>([]);
 
-	// Load game state on component mount
+	// Load game state and word sets on component mount
 	$effect(() => {
 		loadGameState();
+		loadWordSets();
 		// Set up polling to keep state synchronized
 		const interval = setInterval(loadGameState, 1000);
 		return () => clearInterval(interval);
@@ -35,6 +38,20 @@
 			}
 		} catch (err) {
 			console.error('Error loading game state:', err);
+		}
+	}
+
+	async function loadWordSets() {
+		try {
+			const response = await fetch('/api/game1/wordsets');
+			if (response.ok) {
+				const result = await response.json();
+				if (result.success) {
+					availableWordSets = result.data;
+				}
+			}
+		} catch (err) {
+			console.error('Error loading word sets:', err);
 		}
 	}
 
@@ -64,6 +81,23 @@
 	<!-- Game Control Section -->
 	<div class="mb-6 rounded border border-orange-300 bg-orange-900/20 p-4">
 		<h3 class="mb-3 text-lg font-bold text-orange-300">Spiel-Steuerung</h3>
+
+		<!-- Word Set Selection -->
+		{#if !gameState.gameStarted && availableWordSets.length > 0}
+			<div class="mb-4">
+				<label class="mb-2 block text-sm font-bold text-orange-200">Wortliste wählen:</label>
+				<select
+					bind:value={gameState.currentWordSet}
+					onchange={(e) =>
+						gameAction({ type: Game1ActionType.CHANGE_WORD_SET, wordSetId: e.target.value })}
+					class="rounded border-2 border-gray-600 bg-gray-800 px-3 py-2 text-white focus:border-orange-400"
+				>
+					{#each availableWordSets as wordSet (wordSet.id)}
+						<option value={wordSet.id}>{wordSet.name}</option>
+					{/each}
+				</select>
+			</div>
+		{/if}
 
 		<div class="mb-4 flex flex-wrap gap-2">
 			{#if !gameState.gameStarted}

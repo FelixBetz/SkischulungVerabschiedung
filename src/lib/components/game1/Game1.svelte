@@ -8,7 +8,8 @@
 		remainingWords: [],
 		currentTeamIndex: 0,
 		selectedWord: '',
-		selectedPosition: -1
+		selectedPosition: -1,
+		currentWordSet: 'general'
 	});
 
 	// Load game state on component mount

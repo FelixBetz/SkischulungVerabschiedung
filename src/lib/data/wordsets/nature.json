@@ -1,0 +1,17 @@
+{
+	"id": "nature",
+	"name": "Natur & Umwelt",
+	"startingWord": "Berg",
+	"availableWords": [
+		"Wald",
+		"Meer",
+		"Fluss",
+		"See",
+		"Wiese",
+		"Himmel",
+		"Wolken",
+		"Regen",
+		"Schnee",
+		"Wind"
+	]
+}

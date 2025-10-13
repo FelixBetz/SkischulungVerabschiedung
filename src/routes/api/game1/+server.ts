@@ -2,27 +2,11 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Game1State, Game1Action } from '$lib/types';
 import { Game1ActionType } from '$lib/types';
+import { getInitialGame1State } from '$lib/data/game1-loader';
 
 // In-memory storage for Game 1 state
 // In a production app, this would be stored in a database
-let game1State: Game1State = {
-	gameStarted: false,
-	orderedWords: ['Sonne'], // Starting word
-	remainingWords: [
-		'Apfel',
-		'Baum',
-		'Computer',
-		'Freude',
-		'Garten',
-		'Haus',
-		'Katze',
-		'Musik',
-		'Träume'
-	],
-	currentTeamIndex: 0,
-	selectedWord: '',
-	selectedPosition: -1
-};
+let game1State: Game1State = getInitialGame1State();
 
 export const GET: RequestHandler = async () => {
 	try {
@@ -97,26 +81,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				break;
 
 			case Game1ActionType.RESET_GAME:
-				game1State = {
-					gameStarted: false,
-					orderedWords: ['Sonne'],
-					remainingWords: [
-						'Apfel',
-						'Baum',
-						'Computer',
-						'Freude',
-						'Garten',
-						'Haus',
-						'Katze',
-						'Musik',
-						'Träume'
-					],
-					currentTeamIndex: 0,
-					selectedWord: '',
-					selectedPosition: -1
-				};
+				game1State = getInitialGame1State(game1State.currentWordSet);
 				break;
-
 			case Game1ActionType.INSERT_WORD:
 				if (action.word && typeof action.position === 'number') {
 					// Insert word at position
@@ -144,6 +110,12 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			case Game1ActionType.SELECT_POSITION:
 				game1State.selectedPosition = typeof action.position === 'number' ? action.position : -1;
+				break;
+
+			case Game1ActionType.CHANGE_WORD_SET:
+				if (action.wordSetId) {
+					game1State = getInitialGame1State(action.wordSetId);
+				}
 				break;
 
 			default:
@@ -175,24 +147,7 @@ export const POST: RequestHandler = async ({ request }) => {
 export const DELETE: RequestHandler = async () => {
 	try {
 		// Reset to initial state
-		game1State = {
-			gameStarted: false,
-			orderedWords: ['Sonne'],
-			remainingWords: [
-				'Apfel',
-				'Baum',
-				'Computer',
-				'Freude',
-				'Garten',
-				'Haus',
-				'Katze',
-				'Musik',
-				'Träume'
-			],
-			currentTeamIndex: 0,
-			selectedWord: '',
-			selectedPosition: -1
-		};
+		game1State = getInitialGame1State();
 
 		return json({
 			success: true,

@@ -19,7 +19,8 @@ export enum Game1ActionType {
 	RESET_GAME = 'RESET_GAME',
 	INSERT_WORD = 'INSERT_WORD',
 	SELECT_WORD = 'SELECT_WORD',
-	SELECT_POSITION = 'SELECT_POSITION'
+	SELECT_POSITION = 'SELECT_POSITION',
+	CHANGE_WORD_SET = 'CHANGE_WORD_SET'
 }
 
 export interface Game1State {
@@ -29,6 +30,7 @@ export interface Game1State {
 	currentTeamIndex: number;
 	selectedWord: string;
 	selectedPosition: number;
+	currentWordSet: string;
 }
 
 export interface Game1Action {
@@ -36,4 +38,5 @@ export interface Game1Action {
 	word?: string;
 	position?: number;
 	teamCount?: number;
+	wordSetId?: string;
 }
