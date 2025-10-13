@@ -89,8 +89,6 @@
 	}
 
 	function handlePointsChange(team: Team, event: Event) {
-		console.log('handlePointsChange called');
-
 		const input = event.target as HTMLInputElement;
 		const newPoints = parseInt(input.value);
 		if (!isNaN(newPoints) && newPoints !== team.points) {
@@ -222,6 +220,13 @@
 	</div>
 
 	<div class="mx-auto max-w-7xl p-4">
+		<!-- Game-specific Admin Components -->
+		{#if !loading && !error && currentGameState === GameState.GAME1}
+			<div class="mt-6">
+				<Game1Admin {teams} />
+			</div>
+		{/if}
+
 		{#if loading}
 			<div class="py-8 text-center">
 				<div class="mb-3 text-lg font-bold text-orange-400">Lade Teams...</div>
@@ -324,13 +329,6 @@
 					<div class="text-xl text-gray-400">Keine Teams verfügbar</div>
 				</div>
 			{/if}
-		{/if}
-
-		<!-- Game-specific Admin Components -->
-		{#if !loading && !error && currentGameState === GameState.GAME1}
-			<div class="mt-6">
-				<Game1Admin {teams} />
-			</div>
 		{/if}
 	</div>
 </div>

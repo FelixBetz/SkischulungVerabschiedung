@@ -4,7 +4,7 @@ import { getAvailableWordSets } from '$lib/data/game1-loader';
 
 export const GET: RequestHandler = async () => {
 	try {
-		const wordSets = getAvailableWordSets();
+		const wordSets = await getAvailableWordSets();
 		return json({
 			success: true,
 			data: wordSets

@@ -35,7 +35,7 @@
 	}
 </script>
 
-<div class="flex flex-1 p-8" style="background-color: rgba(255, 165, 0, 0.3);">
+<div class="flex flex-1 p-8">
 	<div class="mx-auto w-full max-w-7xl">
 		<!-- Header -->
 		<div class="mb-4 text-center">

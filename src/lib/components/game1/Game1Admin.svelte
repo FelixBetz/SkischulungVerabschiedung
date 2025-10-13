@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Team, Game1State, Game1Action } from '$lib/types';
 	import { Game1ActionType } from '$lib/types';
+	import type { WordSet } from '$lib/data/game1-loader';
 
 	let { teams = [] }: { teams: Team[] } = $props();
 
@@ -16,7 +17,8 @@
 	});
 
 	// Word sets
-	let availableWordSets = $state<Array<{ id: string; name: string }>>([]);
+	// Word sets
+	let availableWordSets = $state<WordSet[]>([]);
 
 	// Load game state and word sets on component mount
 	$effect(() => {

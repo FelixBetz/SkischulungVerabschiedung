@@ -1,17 +1,5 @@
 {
-	"id": "general",
 	"name": "Allgemeine Wörter",
 	"startingWord": "Sonne",
-	"availableWords": [
-		"Apfel",
-		"Baum",
-		"Computer",
-		"Freude",
-		"Garten",
-		"Haus",
-		"Katze",
-		"Musik",
-		"Träume",
-		"Blume"
-	]
+	"availableWords": ["Apfel", "Sonne", "Computer", "Freude"]
 }

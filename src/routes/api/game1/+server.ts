@@ -6,13 +6,49 @@ import { getInitialGame1State } from '$lib/data/game1-loader';
 
 // In-memory storage for Game 1 state
 // In a production app, this would be stored in a database
-let game1State: Game1State = getInitialGame1State();
+let game1State: Game1State | null = null;
+let isInitializing = false;
+
+async function ensureGameStateInitialized(): Promise<Game1State> {
+	if (game1State) {
+		return game1State;
+	}
+
+	if (isInitializing) {
+		// Wait for initialization to complete
+		while (isInitializing) {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		}
+		if (game1State) {
+			return game1State;
+		}
+	}
+
+	isInitializing = true;
+	try {
+		// Try to initialize with 'general' word set, fall back to any available set
+		game1State = await getInitialGame1State('general');
+
+		// If that fails, try 'default' (our fallback)
+		if (!game1State) {
+			game1State = await getInitialGame1State('default');
+		}
+
+		if (!game1State) {
+			throw new Error('Failed to initialize game state - no word sets available');
+		}
+		return game1State;
+	} finally {
+		isInitializing = false;
+	}
+}
 
 export const GET: RequestHandler = async () => {
 	try {
+		const state = await ensureGameStateInitialized();
 		return json({
 			success: true,
-			data: game1State
+			data: state
 		});
 	} catch (error) {
 		console.error('Error getting Game 1 state:', error);
@@ -28,36 +64,37 @@ export const GET: RequestHandler = async () => {
 
 export const PATCH: RequestHandler = async ({ request }) => {
 	try {
+		const state = await ensureGameStateInitialized();
 		const updates: Partial<Game1State> = await request.json();
 
 		// Update the game state with provided fields
 		if (typeof updates.gameStarted !== 'undefined') {
-			game1State.gameStarted = updates.gameStarted;
+			state.gameStarted = updates.gameStarted;
 		}
 
 		if (Array.isArray(updates.orderedWords)) {
-			game1State.orderedWords = updates.orderedWords;
+			state.orderedWords = updates.orderedWords;
 		}
 
 		if (Array.isArray(updates.remainingWords)) {
-			game1State.remainingWords = updates.remainingWords;
+			state.remainingWords = updates.remainingWords;
 		}
 
 		if (typeof updates.currentTeamIndex !== 'undefined') {
-			game1State.currentTeamIndex = updates.currentTeamIndex;
+			state.currentTeamIndex = updates.currentTeamIndex;
 		}
 
 		if (typeof updates.selectedWord !== 'undefined') {
-			game1State.selectedWord = updates.selectedWord;
+			state.selectedWord = updates.selectedWord;
 		}
 
 		if (typeof updates.selectedPosition !== 'undefined') {
-			game1State.selectedPosition = updates.selectedPosition;
+			state.selectedPosition = updates.selectedPosition;
 		}
 
 		return json({
 			success: true,
-			data: game1State
+			data: state
 		});
 	} catch (error) {
 		console.error('Error updating Game 1 state:', error);
@@ -73,48 +110,59 @@ export const PATCH: RequestHandler = async ({ request }) => {
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
+		let state = await ensureGameStateInitialized();
 		const action: Game1Action = await request.json();
 
 		switch (action.type) {
 			case Game1ActionType.START_GAME:
-				game1State.gameStarted = true;
+				state.gameStarted = true;
 				break;
 
 			case Game1ActionType.RESET_GAME:
-				game1State = getInitialGame1State(game1State.currentWordSet);
+				{
+					const resetState = await getInitialGame1State(state.currentWordSet);
+					if (resetState) {
+						game1State = resetState;
+						state = resetState;
+					}
+				}
 				break;
 			case Game1ActionType.INSERT_WORD:
 				if (action.word && typeof action.position === 'number') {
 					// Insert word at position
-					const newSequence = [...game1State.orderedWords];
+					const newSequence = [...state.orderedWords];
 					newSequence.splice(action.position, 0, action.word);
-					game1State.orderedWords = newSequence;
+					state.orderedWords = newSequence;
 
 					// Remove word from available words
-					game1State.remainingWords = game1State.remainingWords.filter((w) => w !== action.word);
+					state.remainingWords = state.remainingWords.filter((w) => w !== action.word);
 
 					// Reset selection
-					game1State.selectedWord = '';
-					game1State.selectedPosition = -1;
+					state.selectedWord = '';
+					state.selectedPosition = -1;
 
 					// Next team's turn (if teams count provided)
 					if (typeof action.teamCount === 'number' && action.teamCount > 0) {
-						game1State.currentTeamIndex = (game1State.currentTeamIndex + 1) % action.teamCount;
+						state.currentTeamIndex = (state.currentTeamIndex + 1) % action.teamCount;
 					}
 				}
 				break;
 
 			case Game1ActionType.SELECT_WORD:
-				game1State.selectedWord = action.word || '';
+				state.selectedWord = action.word || '';
 				break;
 
 			case Game1ActionType.SELECT_POSITION:
-				game1State.selectedPosition = typeof action.position === 'number' ? action.position : -1;
+				state.selectedPosition = typeof action.position === 'number' ? action.position : -1;
 				break;
 
 			case Game1ActionType.CHANGE_WORD_SET:
 				if (action.wordSetId) {
-					game1State = getInitialGame1State(action.wordSetId);
+					const newState = await getInitialGame1State(action.wordSetId);
+					if (newState) {
+						game1State = newState;
+						state = newState;
+					}
 				}
 				break;
 
@@ -130,7 +178,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		return json({
 			success: true,
-			data: game1State
+			data: state
 		});
 	} catch (error) {
 		console.error('Error processing Game 1 action:', error);
@@ -147,7 +195,10 @@ export const POST: RequestHandler = async ({ request }) => {
 export const DELETE: RequestHandler = async () => {
 	try {
 		// Reset to initial state
-		game1State = getInitialGame1State();
+		const newState = await getInitialGame1State('general');
+		if (newState) {
+			game1State = newState;
+		}
 
 		return json({
 			success: true,

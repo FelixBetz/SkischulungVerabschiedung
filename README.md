@@ -69,3 +69,13 @@ npm run db:studio
 # Add test teams to database (clears existing data)
 npm run db:add-test-data
 ```
+
+# ideas
+
+- Listen sortiern:
+  - Featuers
+    - oben und Begirffe wie sortiert wird: z.B.: jung und alt
+    - falsche Begriffer unterjubeln
+  - Listideen
+    - Zeltlagerthemen
+    - Gießkannenträger
