@@ -11,6 +11,9 @@
 		selectedWord: '',
 		selectedPosition: -1,
 		currentWordSet: 'general',
+		currentWordSetName: '',
+		topLabel: 'Oben',
+		botLabel: 'Unten',
 		correctOrder: []
 	});
 
@@ -41,14 +44,23 @@
 	<div class="mx-auto w-full max-w-7xl">
 		<!-- Header -->
 		<div class="mb-4 text-center">
-			<h1 class="mb-1 text-4xl font-black text-orange-400">Spiel: Liste ordnen</h1>
+			<h1 class="mb-1 text-4xl font-black text-orange-400">
+				Ordnungssamt: {gameState.currentWordSetName} ordnen
+			</h1>
 		</div>
 
 		{#if gameState.gameStarted}
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 				<!-- Word Sequence -->
 				<div class="space-y-2">
-					<h2 class="mb-3 text-2xl font-bold text-orange-300">Wort-Reihenfolge</h2>
+					<!-- Top label as box -->
+					<div class="mb-3 text-center">
+						<div
+							class="inline-block rounded border border-orange-400 bg-orange-600/20 px-3 py-1 text-sm font-medium text-orange-200"
+						>
+							{gameState.topLabel}
+						</div>
+					</div>
 
 					<div class="space-y-1">
 						{#each Array.from({ length: gameState.orderedWords.length + 1 }, (_, i) => i) as position, index (position)}
@@ -90,11 +102,20 @@
 							{/if}
 						{/each}
 					</div>
+
+					<!-- Bottom label as box -->
+					<div class="mt-3 text-center">
+						<div
+							class="inline-block rounded border border-orange-400 bg-orange-600/20 px-3 py-1 text-sm font-medium text-orange-200"
+						>
+							{gameState.botLabel}
+						</div>
+					</div>
 				</div>
 
 				<!-- Available Words -->
 				<div class="space-y-4">
-					<h2 class="mb-3 text-2xl font-bold text-orange-300">Verfügbare Wörter</h2>
+					<h2 class="mb-3 text-2xl font-bold text-orange-300">Sortiere ein</h2>
 					<div class="grid max-h-96 grid-cols-2 gap-2 overflow-y-auto">
 						{#each gameState.remainingWords as word (word)}
 							<button

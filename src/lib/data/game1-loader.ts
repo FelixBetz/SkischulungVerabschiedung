@@ -16,20 +16,11 @@ function shuffleArray<T>(array: T[]): T[] {
 // Default fallback word set when no JSON files are available
 const defaultWordSet: WordSet = {
 	id: 'default',
-	name: 'Standard Wörter',
-	startingWord: 'Sonne',
-	availableWords: [
-		'Sonne',
-		'Apfel',
-		'Baum',
-		'Computer',
-		'Freude',
-		'Garten',
-		'Haus',
-		'Katze',
-		'Musik',
-		'Träume'
-	]
+	name: 'Tiere nach Schulterhöhe',
+	startingWord: 'Maus',
+	availableWords: ['Giraffe', 'Pferd', 'Hund', 'Katze', 'Maus', 'Ameise'],
+	topLabel: 'groß',
+	botLabel: 'klein'
 }; // Dynamic import function to automatically load all wordsets
 async function importWordSets() {
 	const wordSetModules = import.meta.glob('./wordsets/*.json');
@@ -158,9 +149,9 @@ export interface WordSet {
 	name: string;
 	startingWord: string;
 	availableWords: string[];
-}
-
-// Cache for loaded word sets
+	topLabel?: string;
+	botLabel?: string;
+} // Cache for loaded word sets
 let cachedWordSets: Record<string, WordSet> | null = null;
 
 async function getWordSets(): Promise<Record<string, WordSet>> {
@@ -229,6 +220,9 @@ export async function getInitialGame1State(wordSetId: string): Promise<Game1Stat
 		selectedWord: '',
 		selectedPosition: -1,
 		currentWordSet: wordSetId,
+		currentWordSetName: wordSet.name,
+		topLabel: wordSet.topLabel || 'Oben',
+		botLabel: wordSet.botLabel || 'Unten',
 		correctOrder
 	};
 }

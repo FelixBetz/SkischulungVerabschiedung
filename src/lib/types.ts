@@ -32,6 +32,9 @@ export interface Game1State {
 	selectedWord: string;
 	selectedPosition: number;
 	currentWordSet: string;
+	currentWordSetName: string;
+	topLabel: string;
+	botLabel: string;
 	correctOrder: string[];
 	lastErrorMessage?: string;
 }
