@@ -16,7 +16,7 @@
 	$effect(() => {
 		loadGameState();
 		// Set up polling to keep state synchronized
-		const interval = setInterval(loadGameState, 1000);
+		const interval = setInterval(loadGameState, 100);
 		return () => clearInterval(interval);
 	});
 

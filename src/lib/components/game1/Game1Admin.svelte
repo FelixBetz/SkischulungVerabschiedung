@@ -85,11 +85,16 @@
 		<!-- Word Set Selection -->
 		{#if !gameState.gameStarted && availableWordSets.length > 0}
 			<div class="mb-4">
-				<label class="mb-2 block text-sm font-bold text-orange-200">Wortliste wählen:</label>
+				<label for="wordset-select" class="mb-2 block text-sm font-bold text-orange-200"
+					>Wortliste wählen:</label
+				>
 				<select
+					id="wordset-select"
 					bind:value={gameState.currentWordSet}
-					onchange={(e) =>
-						gameAction({ type: Game1ActionType.CHANGE_WORD_SET, wordSetId: e.target.value })}
+					onchange={(e) => {
+						const target = e.target as HTMLSelectElement;
+						gameAction({ type: Game1ActionType.CHANGE_WORD_SET, wordSetId: target.value });
+					}}
 					class="rounded border-2 border-gray-600 bg-gray-800 px-3 py-2 text-white focus:border-orange-400"
 				>
 					{#each availableWordSets as wordSet (wordSet.id)}
