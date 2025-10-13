@@ -20,7 +20,8 @@ export enum Game1ActionType {
 	INSERT_WORD = 'INSERT_WORD',
 	SELECT_WORD = 'SELECT_WORD',
 	SELECT_POSITION = 'SELECT_POSITION',
-	CHANGE_WORD_SET = 'CHANGE_WORD_SET'
+	CHANGE_WORD_SET = 'CHANGE_WORD_SET',
+	CLEAR_ERROR = 'CLEAR_ERROR'
 }
 
 export interface Game1State {
@@ -31,6 +32,8 @@ export interface Game1State {
 	selectedWord: string;
 	selectedPosition: number;
 	currentWordSet: string;
+	correctOrder: string[];
+	lastErrorMessage?: string;
 }
 
 export interface Game1Action {

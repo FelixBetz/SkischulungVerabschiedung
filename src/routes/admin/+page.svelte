@@ -3,6 +3,8 @@
 	import type { Team } from '$lib/types.js';
 	import { GameState } from '$lib/types.js';
 	import Game1Admin from '$lib/components/Game1/Game1Admin.svelte';
+	import ErrorLog from '$lib/components/ErrorLog.svelte';
+	import { addError } from '$lib/stores/errorStore';
 
 	let teams: Team[] = $state([]);
 	let loading = $state(true);
@@ -29,7 +31,7 @@
 				throw new Error(result.error || 'Failed to load teams');
 			}
 		} catch (err) {
-			console.error('Error loading teams:', err);
+			addError('error', 'admin-panel', 'Error loading teams', err);
 			error = err instanceof Error ? err.message : 'Failed to load teams';
 		} finally {
 			loading = false;
@@ -71,7 +73,7 @@
 				saveStatus = { ...saveStatus };
 			}, 2000);
 		} catch (err) {
-			console.error('Error updating team:', err);
+			addError('error', 'admin-panel', `Error updating team ${teamId}`, err);
 			saveStatus[teamId] = 'error';
 			setTimeout(() => {
 				delete saveStatus[teamId];
@@ -131,7 +133,7 @@
 				saveStatus = { ...saveStatus };
 			}, 2000);
 		} catch (err) {
-			console.error('Error adding points:', err);
+			addError('error', 'admin-panel', `Error adding points to team ${teamId}`, err);
 			saveStatus[teamId] = 'error';
 			setTimeout(() => {
 				delete saveStatus[teamId];
@@ -150,7 +152,7 @@
 				}
 			}
 		} catch (err) {
-			console.error('Error loading game state:', err);
+			addError('error', 'admin-panel', 'Error loading game state', err);
 		}
 	}
 
@@ -169,7 +171,7 @@
 				}
 			}
 		} catch (err) {
-			console.error('Error updating game state:', err);
+			addError('error', 'admin-panel', 'Error updating game state', err);
 		}
 	}
 
@@ -330,5 +332,10 @@
 				</div>
 			{/if}
 		{/if}
+
+		<!-- Error Log Section -->
+		<div class="mt-8 mb-8 rounded-lg border border-gray-700 bg-gray-800/50 p-6">
+			<ErrorLog />
+		</div>
 	</div>
 </div>

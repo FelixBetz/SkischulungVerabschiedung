@@ -2,7 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Game1State, Game1Action } from '$lib/types';
 import { Game1ActionType } from '$lib/types';
-import { getInitialGame1State } from '$lib/data/game1-loader';
+import { getInitialGame1State, validateWordPlacement } from '$lib/data/game1-loader';
+import { addError } from '$lib/stores/errorStore';
 
 // In-memory storage for Game 1 state
 // In a production app, this would be stored in a database
@@ -35,7 +36,9 @@ async function ensureGameStateInitialized(): Promise<Game1State> {
 		}
 
 		if (!game1State) {
-			throw new Error('Failed to initialize game state - no word sets available');
+			const errorMsg = 'Failed to initialize game state - no word sets available';
+			addError('error', 'game1-api', errorMsg);
+			throw new Error(errorMsg);
 		}
 		return game1State;
 	} finally {
@@ -51,7 +54,7 @@ export const GET: RequestHandler = async () => {
 			data: state
 		});
 	} catch (error) {
-		console.error('Error getting Game 1 state:', error);
+		addError('error', 'game1-api', 'Failed to get game state', error);
 		return json(
 			{
 				success: false,
@@ -97,7 +100,7 @@ export const PATCH: RequestHandler = async ({ request }) => {
 			data: state
 		});
 	} catch (error) {
-		console.error('Error updating Game 1 state:', error);
+		addError('error', 'game1-api', 'Failed to update game state', error);
 		return json(
 			{
 				success: false,
@@ -129,6 +132,23 @@ export const POST: RequestHandler = async ({ request }) => {
 				break;
 			case Game1ActionType.INSERT_WORD:
 				if (action.word && typeof action.position === 'number') {
+					// Validate word placement
+					const validation = validateWordPlacement(
+						action.word,
+						action.position,
+						state.orderedWords,
+						state.correctOrder
+					);
+
+					if (!validation.isValid) {
+						// Set error message and don't place the word
+						state.lastErrorMessage = validation.errorMessage;
+						break;
+					}
+
+					// Clear any previous error
+					state.lastErrorMessage = undefined;
+
 					// Insert word at position
 					const newSequence = [...state.orderedWords];
 					newSequence.splice(action.position, 0, action.word);
@@ -166,6 +186,10 @@ export const POST: RequestHandler = async ({ request }) => {
 				}
 				break;
 
+			case Game1ActionType.CLEAR_ERROR:
+				state.lastErrorMessage = undefined;
+				break;
+
 			default:
 				return json(
 					{
@@ -181,7 +205,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			data: state
 		});
 	} catch (error) {
-		console.error('Error processing Game 1 action:', error);
+		addError('error', 'game1-api', 'Failed to process action', error);
 		return json(
 			{
 				success: false,

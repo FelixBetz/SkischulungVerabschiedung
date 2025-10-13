@@ -70,7 +70,7 @@ npm run db:studio
 npm run db:add-test-data
 ```
 
-# ideas
+## ideas
 
 - Listen sortiern:
   - Featuers

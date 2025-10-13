@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Game1State } from '$lib/types';
+	import { addError } from '$lib/stores/errorStore';
 
 	// Game state from API
 	let gameState = $state<Game1State>({
@@ -9,7 +10,8 @@
 		currentTeamIndex: 0,
 		selectedWord: '',
 		selectedPosition: -1,
-		currentWordSet: 'general'
+		currentWordSet: 'general',
+		correctOrder: []
 	});
 
 	// Load game state on component mount
@@ -30,7 +32,7 @@
 				}
 			}
 		} catch (err) {
-			console.error('Error loading game state:', err);
+			addError('error', 'game1', 'Error loading game state', err);
 		}
 	}
 </script>
@@ -103,5 +105,47 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Error Message Display -->
+		{#if gameState.lastErrorMessage}
+			<div class="mx-auto mt-6 max-w-2xl">
+				<div class="rounded-lg border border-red-400 bg-red-900/20 p-4 text-red-200">
+					<div class="flex items-start justify-between">
+						<div class="flex items-start space-x-3">
+							<svg
+								class="mt-0.5 h-6 w-6 flex-shrink-0 text-red-400"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+									clip-rule="evenodd"
+								></path>
+							</svg>
+							<div>
+								<h3 class="font-bold text-red-300">Ungültige Platzierung!</h3>
+								<p class="mt-1 text-sm">{gameState.lastErrorMessage}</p>
+							</div>
+						</div>
+						<button
+							onclick={() => {
+								// This will be handled by the polling - the admin can clear the error
+							}}
+							class="ml-2 text-red-400 hover:text-red-300"
+							title="Die Fehlermeldung wird automatisch ausgeblendet"
+						>
+							<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+									clip-rule="evenodd"
+								></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		{/if}
 	</div>
 </div>

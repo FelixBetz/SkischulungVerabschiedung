@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAvailableWordSets } from '$lib/data/game1-loader';
+import { addError } from '$lib/stores/errorStore';
 
 export const GET: RequestHandler = async () => {
 	try {
@@ -10,7 +11,7 @@ export const GET: RequestHandler = async () => {
 			data: wordSets
 		});
 	} catch (error) {
-		console.error('Error getting word sets:', error);
+		addError('error', 'wordsets-api', 'Failed to get word sets', error);
 		return json(
 			{
 				success: false,

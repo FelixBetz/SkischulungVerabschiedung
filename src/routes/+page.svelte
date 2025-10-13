@@ -10,6 +10,8 @@
 	import type { Team } from '$lib/types';
 	import { GameState } from '$lib/types';
 
+	import { addError } from '$lib/stores/errorStore';
+
 	let teams = $state<Team[]>([]);
 	let currentGameState: GameState = $state(GameState.HOME);
 
@@ -39,7 +41,7 @@
 				}
 			}
 		} catch (err) {
-			console.error('Error loading game state:', err);
+			addError('error', 'main-page', 'Error loading game state', err);
 		}
 	}
 
