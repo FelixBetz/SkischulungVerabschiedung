@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { Team } from '$lib/types.js';
 	import { GameState } from '$lib/types.js';
+	import Game1Admin from '$lib/components/Game1/Game1Admin.svelte';
 
 	let teams: Team[] = $state([]);
 	let loading = $state(true);
@@ -323,6 +324,13 @@
 					<div class="text-xl text-gray-400">Keine Teams verfügbar</div>
 				</div>
 			{/if}
+		{/if}
+
+		<!-- Game-specific Admin Components -->
+		{#if !loading && !error && currentGameState === GameState.GAME1}
+			<div class="mt-6">
+				<Game1Admin {teams} />
+			</div>
 		{/if}
 	</div>
 </div>

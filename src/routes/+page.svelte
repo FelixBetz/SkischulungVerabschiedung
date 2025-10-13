@@ -2,7 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import ScoreSidebar from '$lib/components/ScoreSidebar.svelte';
 	import Welcome from '$lib/components/Welcome.svelte';
-	import Game1 from '$lib/components/Game1.svelte';
+	import Game1 from '$lib/components/Game1/Game1.svelte';
 	import Game2 from '$lib/components/Game2.svelte';
 	import Game3 from '$lib/components/Game3.svelte';
 	import Game4 from '$lib/components/Game4.svelte';
@@ -89,7 +89,7 @@
 			{#if currentGameState === GameState.HOME}
 				<Welcome />
 			{:else if currentGameState === GameState.GAME1}
-				<Game1 {teams} />
+				<Game1 />
 			{:else if currentGameState === GameState.GAME2}
 				<Game2 />
 			{:else if currentGameState === GameState.GAME3}

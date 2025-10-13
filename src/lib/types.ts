@@ -13,3 +13,27 @@ export enum GameState {
 	GAME4 = 'game4',
 	GAME5 = 'game5'
 }
+
+export enum Game1ActionType {
+	START_GAME = 'START_GAME',
+	RESET_GAME = 'RESET_GAME',
+	INSERT_WORD = 'INSERT_WORD',
+	SELECT_WORD = 'SELECT_WORD',
+	SELECT_POSITION = 'SELECT_POSITION'
+}
+
+export interface Game1State {
+	gameStarted: boolean;
+	orderedWords: string[];
+	remainingWords: string[];
+	currentTeamIndex: number;
+	selectedWord: string;
+	selectedPosition: number;
+}
+
+export interface Game1Action {
+	type: Game1ActionType;
+	word?: string;
+	position?: number;
+	teamCount?: number;
+}
