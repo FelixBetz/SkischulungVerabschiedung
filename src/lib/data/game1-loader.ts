@@ -1,6 +1,18 @@
 import type { Game1State } from '../types';
 import { addError } from '../stores/errorStore';
 
+/**
+ * Shuffle array using Fisher-Yates algorithm
+ */
+function shuffleArray<T>(array: T[]): T[] {
+	const shuffled = [...array];
+	for (let i = shuffled.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+	}
+	return shuffled;
+}
+
 // Default fallback word set when no JSON files are available
 const defaultWordSet: WordSet = {
 	id: 'default',
@@ -204,8 +216,10 @@ export async function getInitialGame1State(wordSetId: string): Promise<Game1Stat
 	// The correct order is now just the availableWords array (which includes the starting word)
 	const correctOrder = [...wordSet.availableWords];
 
-	// Remove the starting word from remaining words since it's already placed
-	const remainingWords = wordSet.availableWords.filter((word) => word !== wordSet.startingWord);
+	// Remove the starting word from remaining words since it's already placed, then shuffle randomly
+	const remainingWords = shuffleArray(
+		wordSet.availableWords.filter((word) => word !== wordSet.startingWord)
+	);
 
 	return {
 		gameStarted: false,
