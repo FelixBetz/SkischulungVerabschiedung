@@ -15,6 +15,9 @@
 		selectedWord: '',
 		selectedPosition: -1,
 		currentWordSet: 'general',
+		currentWordSetName: '',
+		topLabel: 'Oben',
+		botLabel: 'Unten',
 		correctOrder: []
 	});
 
