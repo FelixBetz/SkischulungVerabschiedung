@@ -174,23 +174,36 @@
 					</div>
 				</div>
 
-				<!-- Platzieren Button -->
-				<button
-					onclick={() => {
-						if (gameState.selectedWord && gameState.selectedPosition !== -1) {
-							gameAction({
-								type: Game1ActionType.INSERT_WORD,
-								word: gameState.selectedWord,
-								position: gameState.selectedPosition,
-								teamCount: teams.length
-							});
-						}
-					}}
-					disabled={!gameState.selectedWord || gameState.selectedPosition === -1}
-					class="rounded bg-green-600 px-6 py-2 font-bold text-white hover:bg-green-500 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:opacity-50"
-				>
-					Platzieren
-				</button>
+				<!-- Action Buttons -->
+				<div class="flex gap-2">
+					<button
+						onclick={() => {
+							if (gameState.selectedWord && gameState.selectedPosition !== -1) {
+								gameAction({
+									type: Game1ActionType.INSERT_WORD,
+									word: gameState.selectedWord,
+									position: gameState.selectedPosition,
+									teamCount: teams.length
+								});
+							}
+						}}
+						disabled={!gameState.selectedWord || gameState.selectedPosition === -1}
+						class="rounded bg-green-600 px-6 py-2 font-bold text-white hover:bg-green-500 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:opacity-50"
+					>
+						Platzieren
+					</button>
+
+					<button
+						onclick={() => {
+							gameAction({ type: Game1ActionType.SELECT_WORD, word: '' });
+							gameAction({ type: Game1ActionType.SELECT_POSITION, position: -1 });
+						}}
+						disabled={!gameState.selectedWord && gameState.selectedPosition === -1}
+						class="rounded bg-orange-600 px-4 py-2 font-bold text-white hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:opacity-50"
+					>
+						Auswahl zurücksetzen
+					</button>
+				</div>
 
 				<!-- Error Message -->
 				{#if gameState.lastErrorMessage}
