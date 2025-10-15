@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Game1State } from '$lib/types';
 	import { addError } from '$lib/stores/errorStore';
+	import PositionButton from './PositionButton.svelte';
 
 	// Game state from API
 	let gameState = $state<Game1State>({
@@ -63,20 +64,12 @@
 					</div>
 
 					<div class="space-y-1">
-						{#each Array.from({ length: gameState.orderedWords.length + 1 }, (_, i) => i) as position, index (position)}
+						{#each Array.from({ length: gameState.orderedWords.length + 1 }, (_, i) => i) as position (position)}
 							{#if position < gameState.orderedWords.length}
-								<!-- Position button -->
-								<div class="flex items-center" style="margin-top: -10px;">
-									<button
-										disabled={gameState.selectedPosition === index}
-										class="flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-bold transition-all {gameState.selectedPosition ===
-										position
-											? 'border-orange-400 bg-orange-600 text-white'
-											: 'cursor-not-allowed border-gray-600 bg-gray-800 text-gray-500 opacity-50'}"
-									>
-										{position + 1}
-									</button>
-								</div>
+								<PositionButton
+									position={position + 1}
+									isSelected={gameState.selectedPosition === position}
+								/>
 
 								<!-- Word -->
 								<div class="ml-8 flex items-center" style="margin-top: -15px;">
@@ -87,18 +80,10 @@
 									</div>
 								</div>
 							{:else}
-								<!-- Final position button -->
-								<div class="flex items-center" style="margin-top: -15px;">
-									<button
-										disabled={!gameState.selectedWord}
-										class="flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-bold transition-all {gameState.selectedPosition ===
-										position
-											? 'border-orange-400 bg-orange-600 text-white'
-											: 'cursor-not-allowed border-gray-600 bg-gray-800 text-gray-500 opacity-50'}"
-									>
-										{position + 1}
-									</button>
-								</div>
+								<PositionButton
+									position={position + 1}
+									isSelected={gameState.selectedPosition === position}
+								/>
 							{/if}
 						{/each}
 					</div>
