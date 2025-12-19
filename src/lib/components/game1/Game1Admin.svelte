@@ -1,4 +1,8 @@
 <script lang="ts">
+	function resetSelection() {
+		gameAction({ type: Game1ActionType.SELECT_WORD, word: '' });
+		gameAction({ type: Game1ActionType.SELECT_POSITION, position: -1 });
+	}
 	import type { Team, Game1State, Game1Action } from '$lib/types';
 	import { Game1ActionType } from '$lib/types';
 	import type { WordSet } from '$lib/data/game1-loader';
@@ -194,10 +198,7 @@
 					</button>
 
 					<button
-						onclick={() => {
-							gameAction({ type: Game1ActionType.SELECT_WORD, word: '' });
-							gameAction({ type: Game1ActionType.SELECT_POSITION, position: -1 });
-						}}
+						onclick={resetSelection}
 						disabled={!gameState.selectedWord && gameState.selectedPosition === -1}
 						class="rounded bg-orange-600 px-4 py-2 font-bold text-white hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:opacity-50"
 					>
@@ -224,7 +225,10 @@
 								<p class="text-sm font-medium">{gameState.lastErrorMessage}</p>
 							</div>
 							<button
-								onclick={() => gameAction({ type: Game1ActionType.CLEAR_ERROR })}
+								onclick={() => {
+									gameAction({ type: Game1ActionType.CLEAR_ERROR });
+									resetSelection();
+								}}
 								class="ml-2 text-red-400 hover:text-red-300"
 								title="Fehlermeldung schließen"
 							>
