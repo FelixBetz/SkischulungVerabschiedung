@@ -83,15 +83,17 @@
 	</div>
 
 	<div class="relative z-10 flex min-h-screen">
-		<ScoreSidebar {teams} />
+		{#if currentGameState === GameState.HOME}
+			<ScoreSidebar {teams} />
+		{/if}
 
 		<!-- Main content area -->
-		<div class="flex flex-1 items-center justify-center">
+		<div class="flex flex-1 justify-center">
 			<!-- Dynamic content based on game state -->
 			{#if currentGameState === GameState.HOME}
 				<Welcome />
 			{:else if currentGameState === GameState.GAME1}
-				<Game1 />
+				<Game1 {teams} />
 			{:else if currentGameState === GameState.GAME2}
 				<Game2 />
 			{:else if currentGameState === GameState.GAME3}

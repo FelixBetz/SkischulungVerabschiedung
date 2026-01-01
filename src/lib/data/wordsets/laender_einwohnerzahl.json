@@ -1,0 +1,7 @@
+{
+	"name": "Länder nach Einwohnerzahl",
+	"startingWord": "Schweiz",
+	"availableWords": ["China", "USA", "Deutschland", "Schweiz", "Vatikanstaat"],
+	"topLabel": "Größte Bevölkerung",
+	"botLabel": "Kleinste Bevölkerung"
+}

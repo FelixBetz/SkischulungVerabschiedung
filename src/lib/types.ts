@@ -3,6 +3,7 @@ export interface Team {
 	name: string;
 	points: number;
 	iconUrl: string;
+	hearts: number;
 }
 
 export enum GameState {
@@ -21,6 +22,7 @@ export enum Game1ActionType {
 	SELECT_WORD = 'SELECT_WORD',
 	SELECT_POSITION = 'SELECT_POSITION',
 	CHANGE_WORD_SET = 'CHANGE_WORD_SET',
+	CHANGE_TEAM = 'CHANGE_TEAM',
 	CLEAR_ERROR = 'CLEAR_ERROR'
 }
 
@@ -37,6 +39,10 @@ export interface Game1State {
 	botLabel: string;
 	correctOrder: string[];
 	lastErrorMessage?: string;
+	/**
+	 * The ID of the currently active team, or null/undefined if no team is active.
+	 */
+	activeTeamId?: number | null;
 }
 
 export interface Game1Action {
@@ -45,4 +51,5 @@ export interface Game1Action {
 	position?: number;
 	teamCount?: number;
 	wordSetId?: string;
+	teamIndex?: number;
 }

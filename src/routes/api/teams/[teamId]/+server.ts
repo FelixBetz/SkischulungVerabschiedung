@@ -44,11 +44,11 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 };
 
-// PATCH /api/teams/[teamId] - Update team points or name by ID
+// PATCH /api/teams/[teamId] - Update team points, name, or hearts by ID
 export const PATCH: RequestHandler = async ({ params, request }) => {
 	try {
 		const body = await request.json();
-		const { points, name, addPoints } = body;
+		const { points, name, addPoints, hearts } = body;
 		const teamId = parseInt(params.teamId);
 
 		if (isNaN(teamId)) {
@@ -90,6 +90,15 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		// Update name
 		if (name && name !== existingTeam.name) {
 			const result = await teamsRepository.updateTeamName(teamId, name);
+			if (result) updatedTeam = result;
+		}
+
+		// Update hearts
+		if (typeof hearts === 'number') {
+			const result = await teamsRepository.updateTeamHearts(
+				teamId,
+				Math.max(0, Math.min(5, hearts))
+			);
 			if (result) updatedTeam = result;
 		}
 

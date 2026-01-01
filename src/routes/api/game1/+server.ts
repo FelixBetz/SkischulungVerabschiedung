@@ -117,6 +117,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		const action: Game1Action = await request.json();
 
 		switch (action.type) {
+			case Game1ActionType.CHANGE_TEAM:
+				if (typeof action.teamIndex === 'number') {
+					state.currentTeamIndex = action.teamIndex;
+				}
+				break;
 			case Game1ActionType.START_GAME:
 				state.gameStarted = true;
 				break;

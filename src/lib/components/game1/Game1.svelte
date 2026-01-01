@@ -1,7 +1,10 @@
 <script lang="ts">
-	import type { Game1State } from '$lib/types';
+	import type { Game1State, Team } from '$lib/types';
 	import { addError } from '$lib/stores/errorStore';
 	import PositionButton from './PositionButton.svelte';
+
+	// Svelte 5 runes mode: use $props() for props
+	const { teams = [] } = $props<{ teams?: Team[] }>();
 
 	// Game state from API
 	let gameState = $state<Game1State>({
@@ -42,7 +45,41 @@
 </script>
 
 <div class="flex flex-1 p-8">
-	<div class="mx-auto w-full max-w-7xl">
+	<!-- Team sidebar left -->
+	{#if teams && teams.length > 0}
+		<div class="flex min-w-[120px] flex-col items-center gap-8 pr-8">
+			{#each teams as team, i (team.id)}
+				<div class="flex flex-col items-center">
+					{#if team.iconUrl}
+						<img
+							src={team.iconUrl}
+							alt={team.name}
+							class="h-20 w-20 object-cover shadow transition-all duration-150
+							{gameState.currentTeamIndex === i
+								? 'rounded-lg border-4 border-red-600'
+								: 'rounded-full border-2 border-orange-400'} bg-white"
+						/>
+					{:else}
+						<div
+							class="flex h-20 w-20 items-center justify-center text-3xl text-gray-600 shadow transition-all duration-150
+							{gameState.currentTeamIndex === i
+								? 'rounded-lg border-4 border-red-600 bg-orange-100'
+								: 'rounded-full border-2 border-orange-400 bg-gray-300'}"
+						>
+							?
+						</div>
+					{/if}
+					<span
+						class="mb-1 text-center text-base font-semibold {gameState.currentTeamIndex === i
+							? 'text-red-600'
+							: 'text-orange-200'}">{team.name}</span
+					>
+				</div>
+			{/each}
+		</div>
+	{/if}
+
+	<div class="mx-auto w-full max-w-7xl flex-1">
 		<!-- Header -->
 		<div class="mb-4 text-center">
 			<h1 class="mb-1 text-4xl font-black text-orange-400">
@@ -136,8 +173,8 @@
 
 				<!-- Available Words -->
 				<div class="space-y-4">
-					<h2 class="mb-3 text-2xl font-bold text-orange-300">Sortiere ein</h2>
-					<div class="grid max-h-96 grid-cols-2 gap-2 overflow-y-auto">
+					<h2 class="mb-3 text-xl font-bold text-orange-300">Sortiere ein</h2>
+					<div class="grid grid-cols-2 gap-2">
 						{#each gameState.remainingWords as word (word)}
 							<button
 								disabled={!!gameState.lastErrorMessage}

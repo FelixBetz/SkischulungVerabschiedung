@@ -27,6 +27,12 @@ export class TeamsRepository {
 		return result[0];
 	}
 
+	// Update team hearts
+	async updateTeamHearts(id: number, hearts: number): Promise<Team | null> {
+		await db.update(teams).set({ hearts }).where(eq(teams.id, id));
+		return await this.getTeamById(id);
+	}
+
 	// Update team
 	async updateTeam(id: number, updates: Partial<Omit<Team, 'id'>>): Promise<Team | null> {
 		await db.update(teams).set(updates).where(eq(teams.id, id));

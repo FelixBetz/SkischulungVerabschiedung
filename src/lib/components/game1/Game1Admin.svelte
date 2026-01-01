@@ -87,6 +87,49 @@
 </script>
 
 <div class="rounded-lg border-2 border-orange-400 bg-gray-800 p-6">
+	<!-- Team-Auswahlleiste -->
+	{#if teams && teams.length > 0}
+		<div class="mb-6 flex flex-row flex-wrap items-center justify-center gap-4">
+			{#each teams as team, idx (team.id)}
+				<button
+					type="button"
+					class="group flex flex-col items-center focus:outline-none"
+					onclick={() => {
+						gameAction({ type: Game1ActionType.SELECT_POSITION, position: -1 });
+						gameAction({ type: Game1ActionType.SELECT_WORD, word: '' });
+						gameAction({ type: Game1ActionType.CHANGE_TEAM, teamIndex: idx });
+					}}
+					title={team.name}
+					style="cursor:pointer"
+				>
+					{#if team.iconUrl}
+						<img
+							src={team.iconUrl}
+							alt={team.name}
+							class="mb-1 h-16 w-16 rounded-full border-4 object-cover transition-all duration-150
+							{gameState.currentTeamIndex === idx
+								? 'scale-110 border-4 border-orange-400 shadow-lg'
+								: 'border-2 border-gray-500 opacity-80 group-hover:border-orange-300'}"
+						/>
+					{:else}
+						<div
+							class="mb-1 flex h-16 w-16 items-center justify-center rounded-full border-4 bg-gray-300 text-2xl text-gray-600 transition-all duration-150
+							{gameState.currentTeamIndex === idx
+								? 'scale-110 border-4 border-orange-400 shadow-lg'
+								: 'border-2 border-gray-500 opacity-80 group-hover:border-orange-300'}"
+						>
+							?
+						</div>
+					{/if}
+					<span
+						class="text-xs font-semibold text-orange-200 {gameState.currentTeamIndex === idx
+							? 'underline'
+							: ''}">{team.name}</span
+					>
+				</button>
+			{/each}
+		</div>
+	{/if}
 	<h2 class="mb-4 text-2xl font-bold text-orange-400">Game 1: Wörter ordnen - Admin</h2>
 
 	<!-- Game Control Section -->
@@ -118,14 +161,40 @@
 		<div class="mb-4 flex flex-wrap gap-2">
 			{#if !gameState.gameStarted}
 				<button
-					onclick={() => gameAction({ type: Game1ActionType.START_GAME })}
+					onclick={async () => {
+						// Persistently set hearts to 3 for each team
+						await Promise.all(
+							teams.map(async (team) => {
+								team.hearts = 3;
+								await fetch(`/api/teams/${team.id}`, {
+									method: 'PATCH',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({ hearts: 3 })
+								});
+							})
+						);
+						gameAction({ type: Game1ActionType.START_GAME });
+					}}
 					class="rounded bg-green-600 px-4 py-2 font-bold text-white hover:bg-green-500"
 				>
 					Spiel starten
 				</button>
 			{:else}
 				<button
-					onclick={() => gameAction({ type: Game1ActionType.RESET_GAME })}
+					onclick={async () => {
+						// Persistently reset hearts to 3 for each team
+						await Promise.all(
+							teams.map(async (team) => {
+								team.hearts = 3;
+								await fetch(`/api/teams/${team.id}`, {
+									method: 'PATCH',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({ hearts: 3 })
+								});
+							})
+						);
+						gameAction({ type: Game1ActionType.RESET_GAME });
+					}}
 					class="rounded bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-500"
 				>
 					Spiel zurücksetzen

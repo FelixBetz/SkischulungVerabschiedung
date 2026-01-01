@@ -1,17 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import type { Team } from '$lib/types.js';
-	import { GameState } from '$lib/types.js';
-	import Game1Admin from '$lib/components/Game1/Game1Admin.svelte';
-	import ErrorLog from '$lib/components/ErrorLog.svelte';
-	import { addError } from '$lib/stores/errorStore';
-
-	let teams: Team[] = $state([]);
-	let loading = $state(true);
-	let error: string | null = $state(null);
-	let saveStatus: { [teamId: number]: 'saving' | 'saved' | 'error' } = $state({});
-	let currentGameState: GameState = $state(GameState.HOME);
-
+	// Load teams from the API
 	async function loadTeams(forceLoading = false) {
 		try {
 			if (teams.length === 0 || forceLoading) {
@@ -35,6 +23,63 @@
 			error = err instanceof Error ? err.message : 'Failed to load teams';
 		} finally {
 			loading = false;
+		}
+	}
+	import { onMount } from 'svelte';
+	import type { Team } from '$lib/types.js';
+	import { GameState } from '$lib/types.js';
+	import Game1Admin from '$lib/components/Game1/Game1Admin.svelte';
+	import ErrorLog from '$lib/components/ErrorLog.svelte';
+	import { addError } from '$lib/stores/errorStore';
+
+	let teams: Team[] = $state([]);
+	let loading = $state(true);
+	let error: string | null = $state(null);
+	let saveStatus: { [teamId: number]: 'saving' | 'saved' | 'error' } = $state({});
+	let currentGameState: GameState = $state(GameState.HOME);
+
+	// Handle hearts change and persist to API
+	async function handleHeartsChange(team: Team, newHearts: number) {
+		try {
+			saveStatus[team.id] = 'saving';
+			saveStatus = { ...saveStatus };
+
+			const response = await fetch(`/api/teams/${team.id}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ hearts: newHearts })
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			const result = await response.json();
+			if (!result.success) {
+				throw new Error(result.error || 'Failed to update hearts');
+			}
+
+			// Update local team data immediately with the server response
+			if (result.data) {
+				const teamIndex = teams.findIndex((t) => t.id === team.id);
+				if (teamIndex !== -1) {
+					teams[teamIndex] = result.data;
+					teams = [...teams];
+				}
+			}
+
+			saveStatus[team.id] = 'saved';
+			setTimeout(() => {
+				delete saveStatus[team.id];
+				saveStatus = { ...saveStatus };
+			}, 2000);
+		} catch (err) {
+			addError('error', 'admin-panel', `Error updating hearts for team ${team.id}`, err);
+			saveStatus[team.id] = 'error';
+			setTimeout(() => {
+				delete saveStatus[team.id];
+				saveStatus = { ...saveStatus };
+			}, 3000);
 		}
 	}
 
@@ -278,6 +323,41 @@
 									class="flex-1 border border-gray-600 bg-gray-700 px-2 py-1 text-sm font-bold text-white transition-colors focus:border-orange-400 focus:outline-none"
 									placeholder="Team Name"
 								/>
+							</div>
+							<!-- Hearts Display and Controls -->
+							<div class="mt-2 flex flex-row items-center gap-1">
+								<button
+									class="rounded border border-orange-400 bg-gray-700 px-2 py-0.5 text-xs font-bold text-orange-300 hover:bg-orange-400 hover:text-white disabled:opacity-50"
+									onclick={() => handleHeartsChange(team, Math.max(0, (team.hearts ?? 3) - 1))}
+									disabled={(team.hearts ?? 3) <= 0}
+									title="Herz entfernen"
+								>
+									-
+								</button>
+								{#each Array(team.hearts ?? 3)
+									.fill(0)
+									.map((_, i) => i) as i (i)}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										class="h-5 w-5 text-red-500"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+											clip-rule="evenodd"
+										/>
+									</svg>
+								{/each}
+								<button
+									class="rounded border border-orange-400 bg-gray-700 px-2 py-0.5 text-xs font-bold text-orange-300 hover:bg-orange-400 hover:text-white disabled:opacity-50"
+									onclick={() => handleHeartsChange(team, Math.min(5, (team.hearts ?? 3) + 1))}
+									disabled={(team.hearts ?? 3) >= 5}
+									title="Herz hinzufügen"
+								>
+									+
+								</button>
 							</div>
 						</div>
 

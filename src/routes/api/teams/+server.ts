@@ -26,7 +26,7 @@ export const GET: RequestHandler = async () => {
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const body = await request.json();
-		const { name, points = 0, iconUrl } = body;
+		const { name, points = 0, iconUrl, hearts = 3 } = body;
 
 		if (!name || !iconUrl) {
 			return json(
@@ -41,7 +41,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		const newTeam = {
 			name,
 			points,
-			iconUrl
+			iconUrl,
+			hearts
 		};
 
 		const createdTeam = await teamsRepository.createTeam(newTeam);
@@ -86,8 +87,7 @@ export const PUT: RequestHandler = async ({ request }) => {
 		}
 
 		for (const team of teams) {
-			const { ...teamData } = team;
-			await teamsRepository.createTeam(teamData);
+			await teamsRepository.createTeam(team);
 		}
 
 		const updatedTeams = await teamsRepository.getAllTeams();
